@@ -1,0 +1,12 @@
+**/.*
+!.gitignore
+
+**/*.pdf
+!example.pdf
+
+**/*.synctex.gz
+*.fls
+*.log
+*.aux
+*.*_latexmk
+out/
