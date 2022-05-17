@@ -162,12 +162,12 @@
 \@aftertopicsfalse
 \newcommand{\maketopics}[1][]{%
     \global\@aftertopicstrue%
-    \IfFileExists{topics.tex}{%
-        \CatchFileDef{\@slidetopics}{topics.tex}{}}%
+    \IfFileExists{topics.aux}{%
+        \CatchFileDef{\@slidetopics}{topics.aux}{}}%
         {\global\def\@slidetopics{}}%
     \global\let\@slidetopics\@slidetopics%
     \global\newwrite\@buftopics%
-    \immediate\openout\@buftopics=topics.tex%
+    \immediate\openout\@buftopics=topics.aux%
     \AtEndDocument{\immediate\closeout\@buftopics}%
     \setbox0=\hbox{\def\item{}\@slidetopics\unskip}\ifdim\wd0=0pt\relax\else%
         \begin{itemize}%
