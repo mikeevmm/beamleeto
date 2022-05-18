@@ -31,9 +31,9 @@
 \raggedright
 
 % Redefinition of \maketitle and related commands
-\makeatletter
 
 %  \author{author name}
+\makeatletter
 \let\@authors\@empty
 \renewcommand{\author}[1]{%
     \ifx\@empty\@authors%
@@ -44,6 +44,7 @@
         \global\protected@edef\@authors{\@authors, #1}%
         %\global\edef\@authors{\@authors}%
     \fi}
+\makeatother
 
 %  \affiliation[ref]{affiliation name}
 %  The optional argument allows a reference to a previous reference;
@@ -95,28 +96,38 @@
         \expandafter\setcounter{@affilcounter}{\storecounter}%
     \fi%
     \let\@lastaffil\@newaffil}
+\makeatother
 
 %  \title{title}
+\makeatletter
 \let\@title\@empty
 \renewcommand{\title}[1]{%
     \ifx\@empty\@title%
         \global\def\@title{#1}%
     \else%
-        \GenericError{}{More than one title definition.}{Make sure you are only calling \noexpand\title once. (Before this it said '\@title'.)}%
+        \GenericError{}%
+            {More than one title definition.}%
+            {Make sure you are only calling \noexpand\title once. (Before this it said '\@title'.)}%
     \fi}
+\makeatother
 
 %  \date{date}
+\makeatletter
 \let\@date\@empty
 \renewcommand{\date}[1]{%
     \ifx\@empty\@date%
         \global\def\@date{#1}%
     \else%
-        \GenericError{}{More than one date definition.}{Make sure you are only calling \noexpand\date once. (Before this it said '\@date'.)}%
+        \GenericError{}%
+            {More than one date definition.}%
+            {Make sure you are only calling \noexpand\date once. (Before this it said '\@date'.)}%
     \fi}
-\let\@logoalign\@empty
-\let\@logoentries\@empty
+\makeatother
 
 %  \logo[graphicx options]{path to image}
+\makeatletter
+\let\@logoalign\@empty
+\let\@logoentries\@empty
 \newcommand{\logo}[2][]{%
     \ifx\@empty\@logoentries%
         \global\def\@logoalign{c}%
@@ -125,15 +136,17 @@
         \global\protected@edef\@logoalign{\@logoalign c}%
         \global\protected@edef\@logoentries{\@logoentries & \includegraphics[#1]{#2}}%
     \fi}
+\makeatother
 
 % \maketitle{}
+\makeatletter
 \renewcommand{\maketitle}{%
     \vspace*{0pt plus 1fil}%
     \begin{center}%
     {\Large\textsc{\baselineskip=.8em\@title}\par}\vskip .3em%
     \textsc{\@authors}\par%
     \ifx\@empty\@affils%
-        % No affiliations
+        \relax% No affiliations
     \else%
         {\vspace{.5em}\baselineskip=1pt{\tiny%
             \vspace*{-.5em}%
@@ -142,7 +155,7 @@
     {\footnotesize\textsc{\@date}}\par%
     \end{center}%
     \ifx\@empty\@logoentries%
-        % No logos defined
+        \relax% No logos defined
     \else%
         \par%
         \begin{center}%
