@@ -10,6 +10,7 @@
 \RequirePackage{geometry}
 \RequirePackage{fontsize}
 \RequirePackage{varwidth}
+\RequirePackage{etoolbox}
 \RequirePackage{catchfile}
 
 % Size of the slide
@@ -46,56 +47,68 @@
     \fi}
 \makeatother
 
-%  \affiliation[ref]{affiliation name}
-%  The optional argument allows a reference to a previous reference;
-%  in particular,
-%
-%       \author{John Smith}
-%       \affiliation{The Institute}
-%       \author{Jane Smith}
-%       \affiliation{The Institute}
-%
-%  Will correctly typeset a single affiliation. However,
-%
-%       \author{John Smith}
-%       \affiliation{First Institute}
-%       \affiliation{Second Institute}
-%       \author{Jane Smith}
-%       \affiliation[1]{First Institute}
-%       \affiliation[2]{Second Institute}
-%
-%  Requires the optional arguments to ensure that two (rather than
-%  four) affiliations are typeset.
-\let\@lastaffil\@empty
-\let\@affils\@empty
+%  \affiliation{affiliation name}
+\makeatletter
 \newcounter{@affilcounter}
-\newcommand{\affiliation}[2][\@empty]{%
-    \def\@newaffil{#2}%
-    \def\storecounter{\the@affilcounter}%
+\newwrite\@bufaffils
+\DeclareRobustCommand{\affiliation}[1]{%
+    \def\affilarg{#1\relax}%
+    \protected@edef\affilarg{%
+        \expandafter\expandafter\expandafter\detokenize%
+            \expandafter{\affilarg}}%
     % Calculate the footnotemark:
-    \ifx#1\@empty%
-        \ifx\@lastaffil\@newaffil\relax\else%
-            \stepcounter{@affilcounter}%
-        \fi%
-    \else%
-        \setcounter{@affilcounter}{#1}%
-    \fi%
-    \def\affilsymb{\fnsymbol{@affilcounter}}%
-    \global\protected@edef\@authors{\@authors${}^\affilsymb$}%
-    % Make the footnote if needed:
-    \ifx#1\@empty%
-        \ifx\@lastaffil\@newaffil\relax\else%
-            \ifx\@affils\@empty%
-                \global\protected@edef\@affils{${}^\affilsymb$#2}%
-            \else%
-                \protected@edef\newfoot{, ${}^\affilsymb$#2}%
-                \protected@edef\@affils{\@affils\newfoot}%
+    \setcounter{@affilcounter}{0}%
+    % See on which line this affiliation is
+    \immediate\openin\@bufaffils=affils.aux\relax%
+    % Trying to match \affilarg
+    \IfFileExists{affils.aux}{%
+        \newif\ifmatched%
+        \matchedfalse%
+        \loop\unless\ifeof\@bufaffils%
+            \immediate\read\@bufaffils to\affilline%
+            \ifeof\@bufaffils\relax\else%
+                % Read an empty line
+                {\immediate\read\@bufaffils to\relax}%
             \fi%
+            \stepcounter{@affilcounter}%
+            % Comparing \affilline with \affilarg
+            \ifdefstrequal{\affilline}{\affilarg}{%
+                % Matched, at position \the@affilcounter!
+                \global\matchedtrue%
+            }{% else
+                % Found no match
+                \ifeof\@bufaffils%
+                    % Also, exhausted the possible matches.
+                    \global\setcounter{@affilcounter}{0}%
+                \fi%
+            }%
+            \ifmatched\let\iterate\relax\fi%
+        \repeat}{}%
+    % Finished matching.
+    \immediate\closein\@bufaffils%
+    %
+    \ifnum\value{@affilcounter}=0%
+        % The affiliation was not in there
+        \IfFileExists{affils.aux}{%
+            \CatchFileDef%
+                {\@affilswrite}%
+                {affils.aux}%
+                {\endlinechar=`^^J}% Preserve EOL
+            }{\let\@affilswrite\@empty}%
+        \immediate\openout\@bufaffils=affils.aux\relax%
+        \ifx\@empty\@affilswrite\relax\else%
+            \protected@edef\@affilswrite{%
+                \expandafter\expandafter\expandafter\detokenize%
+                    \expandafter{\@affilswrite}}%
+            \immediate\write\@bufaffils{\@affilswrite}%
         \fi%
+        \immediate\write\@bufaffils{\affilarg}%
+        \immediate\closeout\@bufaffils%
+        %
     \else%
-        \expandafter\setcounter{@affilcounter}{\storecounter}%
-    \fi%
-    \let\@lastaffil\@newaffil}
+        \def\affilsymb{\fnsymbol{@affilcounter}}%
+        \global\protected@edef\@authors{\@authors${}^\affilsymb$}%
+    \fi}
 \makeatother
 
 %  \title{title}
@@ -141,6 +154,26 @@
 % \maketitle{}
 \makeatletter
 \renewcommand{\maketitle}{%
+    \let\@affils\@empty%
+    % All the affiliations are already in the file.
+    % Read the affiliations from file:
+    \IfFileExists{affils.aux}{%
+        \setcounter{@affilcounter}{0}%
+        \immediate\openin\@bufaffils=affils.aux\relax%
+        \loop\unless\ifeof\@bufaffils%
+            \immediate\read\@bufaffils to\lineaffil%
+            {\unless\ifeof\@bufaffils\immediate\read\@bufaffils to\relax\fi}%
+            \stepcounter{@affilcounter}%
+            \global\def\affilsymb{\fnsymbol{@affilcounter}}%
+            \ifx\@empty\@affils%
+                \global\protected@edef\@affils{\lineaffil${}^\affilsymb$}%
+            \else%
+                \global\protected@edef\@affils{%
+                    \@affils, \lineaffil${}^\affilsymb$}%
+            \fi%
+        \repeat%
+        \immediate\closein\@bufaffils%
+    }{}% else nothing
     \vspace*{0pt plus 1fil}%
     \begin{center}%
     {\Large\textsc{\baselineskip=.8em\@title}\par}\vskip .3em%
