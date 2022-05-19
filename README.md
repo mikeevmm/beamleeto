@@ -41,6 +41,7 @@ To use `beamleeto`, just
 \maketitle
 
 \slide[Topics of the Presentation]
+\vskip 0pt plus .5fil
 \maketopics
 
 \slide[Title of the First Slide]
@@ -57,7 +58,7 @@ You can correct this in three simple steps:
 
 1. Pick up [The TeX
    Book](https://www.amazon.com/TeXbook-Donald-Knuth/dp/0201134489)
-2. Marvel at it, for the knowledge within outshines your space-glue-free
+2. Marvel at it, for the knowledge within outshines your space-glue-incapable
    intellect
 3. Put it back down and go use PowerPoint
 
@@ -69,8 +70,8 @@ pasting snippets of code.
 
 ## This Exchange is Unfair Because I don't get to Type my Responses
 
-My repo, my rules. Nonetheless, feel free to send a passionate defence of
-Beamer to `miguelmurca+beamleeto﹫gmail·com`, to be promptly archived.
+Feel free to send a passionate defence of Beamer to
+`miguelmurca+beamleeto﹫gmail·com`, to be appropriately ignored.
 
 
 ## It's not on CTAN
