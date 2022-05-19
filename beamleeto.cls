@@ -166,10 +166,10 @@
             \stepcounter{@affilcounter}%
             \global\def\affilsymb{\fnsymbol{@affilcounter}}%
             \ifx\@empty\@affils%
-                \global\protected@edef\@affils{\lineaffil${}^\affilsymb$}%
+                \global\protected@edef\@affils{${}^\affilsymb$\lineaffil}%
             \else%
                 \global\protected@edef\@affils{%
-                    \@affils, \lineaffil${}^\affilsymb$}%
+                    \@affils, ${}^\affilsymb$\lineaffil}%
             \fi%
         \repeat%
         \immediate\closein\@bufaffils%
