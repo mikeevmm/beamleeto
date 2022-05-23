@@ -54,7 +54,8 @@
 \DeclareRobustCommand{\affiliation}[1]{%
     \def\affilarg{#1\relax}%
     \protected@edef\affilarg{%
-        \expandafter\detokenize{\affilarg}}%
+        \expandafter\expandafter\expandafter\detokenize%
+            \expandafter{\affilarg}}%
     % Calculate the footnotemark:
     \setcounter{@affilcounter}{0}%
     % See on which line this affiliation is
@@ -97,7 +98,8 @@
         \immediate\openout\@bufaffils=affils.aux\relax%
         \ifx\@empty\@affilswrite\relax\else%
             \protected@edef\@affilswrite{%
-                \expandafter\detokenize{\@affilswrite}}%
+                \expandafter\expandafter\expandafter\detokenize%
+                    \expandafter{\@affilswrite}}%
             \immediate\write\@bufaffils{\@affilswrite}%
         \fi%
         \immediate\write\@bufaffils{\affilarg}%
