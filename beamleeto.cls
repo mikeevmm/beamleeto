@@ -43,70 +43,32 @@
     \else%
         % Other authors already present
         \global\protected@edef\@authors{\@authors, #1}%
-        %\global\edef\@authors{\@authors}%
     \fi}
 \makeatother
 
 %  \affiliation{affiliation name}
+% With thanks to zaugin and gus_massa of HackerNews, who pointed out that this
+% could be accomplished without another auxiliarly file. Cheers!
 \makeatletter
 \newcounter{@affilcounter}
-\newwrite\@bufaffils
-\DeclareRobustCommand{\affiliation}[1]{%
-    \def\affilarg{#1\relax}%
+\let\@affils\@empty
+\newcommand{\affiliation}[1]{%
     \protected@edef\affilarg{%
-        \detokenize\expandafter{\affilarg}}%
-    % Calculate the footnotemark:
-    \setcounter{@affilcounter}{0}%
-    % See on which line this affiliation is
-    \immediate\openin\@bufaffils=affils.aux\relax%
-    % Trying to match \affilarg
-    \IfFileExists{affils.aux}{%
-        \newif\ifmatched%
-        \matchedfalse%
-        \loop\unless\ifeof\@bufaffils%
-            \immediate\read\@bufaffils to\affilline%
-            \ifeof\@bufaffils\relax\else%
-                % Read an empty line
-                {\immediate\read\@bufaffils to\relax}%
-            \fi%
-            \stepcounter{@affilcounter}%
-            % Comparing \affilline with \affilarg
-            \ifdefstrequal{\affilline}{\affilarg}{%
-                % Matched, at position \the@affilcounter!
-                \global\matchedtrue%
-            }{% else
-                % Found no match
-                \ifeof\@bufaffils%
-                    % Also, exhausted the possible matches.
-                    \global\setcounter{@affilcounter}{0}%
-                \fi%
-            }%
-            \ifmatched\let\iterate\relax\fi%
-        \repeat}{}%
-    % Finished matching.
-    \immediate\closein\@bufaffils%
-    %
-    \ifnum\value{@affilcounter}=0%
-        % The affiliation was not in there
-        \IfFileExists{affils.aux}{%
-            \CatchFileDef%
-                {\@affilswrite}%
-                {affils.aux}%
-                {\endlinechar=`^^J}% Preserve EOL
-            }{\let\@affilswrite\@empty}%
-        \immediate\openout\@bufaffils=affils.aux\relax%
-        \ifx\@empty\@affilswrite\relax\else%
-            \protected@edef\@affilswrite{%
-                \detokenize\expandafter{\@affilswrite}}%
-            \immediate\write\@bufaffils{\@affilswrite}%
-        \fi%
-        \immediate\write\@bufaffils{\affilarg}%
-        \immediate\closeout\@bufaffils%
-        %
-    \else%
-        \def\affilsymb{\fnsymbol{@affilcounter}}%
-        \global\protected@edef\@authors{\@authors${}^\affilsymb$}%
-    \fi}
+        \detokenize\expandafter{#1}}%
+    \ifcsundef{affil@\affilarg}%
+        {\stepcounter{@affilcounter}%
+         \expandafter\global\expandafter\protected@edef\csname affil@\affilarg\endcsname{%
+            \fnsymbol{@affilcounter}}%
+         \ifx\@empty\@affils%
+            \global\protected@edef\@affils{%
+                ${}^{\csname affil@\affilarg\endcsname}$#1}%
+        \else%
+            \global\protected@edef\@affils{%
+                \@affils, %
+                ${}^{\csname affil@\affilarg\endcsname}$#1}%
+        \fi}{} % else nothing
+    \expandafter\let\expandafter\affilsymb\csname affil@\affilarg\endcsname %
+    \global\protected@edef\@authors{\@authors${}^\affilsymb$}}
 \makeatother
 
 %  \title{title}
@@ -152,26 +114,6 @@
 % \maketitle{}
 \makeatletter
 \renewcommand{\maketitle}{%
-    \let\@affils\@empty%
-    % All the affiliations are already in the file.
-    % Read the affiliations from file:
-    \IfFileExists{affils.aux}{%
-        \setcounter{@affilcounter}{0}%
-        \immediate\openin\@bufaffils=affils.aux\relax%
-        \loop\unless\ifeof\@bufaffils%
-            \immediate\read\@bufaffils to\lineaffil%
-            {\unless\ifeof\@bufaffils\immediate\read\@bufaffils to\relax\fi}%
-            \stepcounter{@affilcounter}%
-            \global\def\affilsymb{\fnsymbol{@affilcounter}}%
-            \ifx\@empty\@affils%
-                \global\protected@edef\@affils{${}^\affilsymb$\lineaffil}%
-            \else%
-                \global\protected@edef\@affils{%
-                    \@affils, ${}^\affilsymb$\lineaffil}%
-            \fi%
-        \repeat%
-        \immediate\closein\@bufaffils%
-    }{}% else nothing
     \vspace*{0pt plus 1fil}%
     \begin{center}%
     {\Large\textsc{\baselineskip=.8em\@title}\par}\vskip .3em%
